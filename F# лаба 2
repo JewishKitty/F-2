@@ -1,0 +1,159 @@
+open System
+let rec main () =
+ let continuation() = 
+  printfn "\nВведите 'y' (англ.) для продолжения "
+  let continuationinput = System.Console.ReadLine()
+  if continuationinput = "y" then 
+    main()
+  else 
+    printfn "done"
+//==============================
+ let rec if_number_int() =
+   printfn "Введите значение "
+   let input = System.Console.ReadLine()
+   match Int32.TryParse(input) with
+    |(true, number) -> 
+     number
+    | _ ->
+     printfn "Ошибка! Введите целое число!"
+     if_number_int()
+     
+ let random_float_list n =
+     let rand = Random()
+     List.init n (fun _ ->
+         let int_part = rand.Next(1, int (2147483647)) // Генерируем целую часть
+         let float_part = rand.NextDouble() // Генерируем дробную часть (0.0 <= x < 1.0)
+         (float int_part) + float_part 
+     )
+     
+ let rec readNumbers () =
+    let rec loop acc =
+        printfn "Введите число не более 15-ти знаков в сумме (или 'stop' для завершения): "
+        let input = System.Console.ReadLine()
+        match System.Double.TryParse(input) with
+         | (true, number) -> 
+          let fifteen = (string (abs (number))).Length
+          if  fifteen <= 15 then
+           loop (number :: acc)
+          else
+           printfn "Ошибка! Введите вещественное число не более 15-ти знаков в сумме!"
+           loop acc
+           
+         | _ when input = "stop" -> acc
+         | _ ->
+            printfn "Ошибка! Введите вещественное число не более 15-ти знаков в сумме!"
+            loop acc
+    let numbers = loop []
+    let result = List.rev numbers
+    result
+    
+
+ let mult_of_digits x =
+     let digits_to_mul = string (abs x)
+     let rec multiplication digits_to_mul =
+         match digits_to_mul with
+         | [] -> 1.0
+         | h :: t when System.Char.IsDigit h -> float(int h - int '0') * multiplication t
+         | _ :: t -> multiplication t
+        
+     multiplication (List.ofSeq digits_to_mul)
+ 
+ let rec remove_unnecessary_zeros binary =
+    match binary with
+    | "" -> "0"
+    | _ when binary.[0] = '0' -> remove_unnecessary_zeros (binary.Substring(1))
+    | _ -> binary
+
+
+ let rec read_bin_Numbers () =
+    let rec loop acc =
+        printfn "Введите бинарное число от 1 до 9 (или 'stop' для завершения): "
+        let input = System.Console.ReadLine()
+        let normilized_input = remove_unnecessary_zeros input
+        match normilized_input with
+         | "1" | "10" | "11" | "100" | "101" | "110" | "111" | "1000" | "1001" -> loop (normilized_input::acc)
+         | "stop" -> acc
+         | _ -> 
+              printfn "Ошибка! Введите бинарное число от 1 до 9!"
+              loop acc
+         
+         
+         
+    let numbers = loop []
+    let result = List.rev numbers
+    result
+
+ let converte_list x =
+   match x with
+         | "1" -> 1 
+         | "10" -> 2
+         | "11" -> 3
+         | "100" -> 4
+         | "101" -> 5
+         | "110" -> 6
+         | "111" -> 7
+         | "1000" -> 8
+         | "1001" -> 9
+         | _ -> -1
+ 
+
+ 
+ 
+ 
+ let rec choice () =
+  printfn "Выберите операцию(1 - сумма произведений цифр соответствующий цифр, 2 - сумма двоичных чисел "
+  let input = System.Console.ReadLine()
+  match System.Int32.TryParse(input) with
+   |(true, number) -> 
+    if number = 1 then
+     printfn "Выберите способ ввода: 1 - ручной, 2 - случайный "
+     let inputchoice = if_number_int()
+     if inputchoice = 1 then
+      let num_mul_list = readNumbers()
+      if num_mul_list = [] then
+       printfn "Список пуст "
+       continuation()
+      else
+       let num_mul_list_result = List.map mult_of_digits num_mul_list
+       List.iter (fun p -> printf "%A " p) num_mul_list
+       printfn "\n "
+       List.iter (fun p -> printf "%.0f " p) num_mul_list_result
+       continuation()
+     elif inputchoice = 2 then
+      printfn "Введите количество элементов списка "
+      let n = if_number_int()
+      if n <= 1 then
+       printfn "Список пуст или введено отр. число "
+       choice()
+      else
+       let num_mul_list = random_float_list n
+       let num_mul_list_result = List.map mult_of_digits num_mul_list
+       List.iter (fun p -> printf "%A " p) num_mul_list
+       printfn "\n "
+       List.iter (fun p -> printf "%.0f " p) num_mul_list_result
+       continuation()
+
+    elif number = 2 then
+     let binirylist = read_bin_Numbers()
+     if binirylist = [] then
+      printfn "Список пуст "
+      continuation()
+     else
+      let convertedlist = List.map converte_list binirylist
+      let binirysum = List.fold (fun acc bin -> acc + bin) 0 convertedlist
+      List.iter (fun p -> printf "%s " p) binirylist
+      printfn "\n"
+      List.iter (fun p -> printf "%A " p) convertedlist
+      printfn "\n"
+      printfn "Сумма элементов списка = %A " binirysum
+      continuation()
+    else 
+      printfn "Нет операции с подходящим номером "
+      choice()
+   | _ ->
+    printfn "Введён не номер операции "
+    choice()
+ 
+ choice()
+
+main()
